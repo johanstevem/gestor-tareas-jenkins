@@ -6,7 +6,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo '=== BUILD ==='
-                echo 'Construyendo el proyecto...'
+                echo 'Construyendo proyecto...'
             }
         }
 
@@ -14,11 +14,11 @@ pipeline {
             steps {
                 echo '=== TEST ==='
 
-                bat 'if not exist index.html exit 1'
-                bat 'if not exist css\\estilos.css exit 1'
-                bat 'if not exist js\\app.js exit 1'
+                sh 'test -f index.html'
+                sh 'test -f css/estilos.css'
+                sh 'test -f js/app.js'
 
-                echo 'Archivos verificados correctamente.'
+                echo 'Todos los archivos existen.'
             }
         }
 
@@ -26,15 +26,18 @@ pipeline {
             steps {
                 echo '=== DEPLOY ==='
 
-                bat 'if not exist deploy mkdir deploy'
-                bat 'copy index.html deploy\\ /Y'
-                bat 'xcopy css deploy\\css\\ /E /I /Y'
-                bat 'xcopy js deploy\\js\\ /E /I /Y'
+                sh '''
+                mkdir -p deploy
+                cp index.html deploy/
+                mkdir -p deploy/css
+                mkdir -p deploy/js
+                cp css/* deploy/css/
+                cp js/* deploy/js/
+                '''
 
-                echo 'Proyecto desplegado correctamente.'
+                echo 'Despliegue completado.'
             }
         }
-
     }
 
     post {
@@ -43,7 +46,7 @@ pipeline {
         }
 
         failure {
-            echo 'El pipeline ha fallado.'
+            echo 'Pipeline falló.'
         }
     }
 }
